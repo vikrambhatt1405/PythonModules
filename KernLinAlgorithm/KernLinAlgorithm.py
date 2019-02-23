@@ -19,15 +19,15 @@ logging.basicConfig(filename='errors.log', filemode='a',
 parser.add_argument("--savefigures", action='store_true', help='Specfiy if you want to save figures')
 parser.add_argument("--nodes", default=50, type=int, help="Number of nodes in Erdos-Renyi Graph")
 parser.add_argument("--p", default=0.25, type=float, help="Probability of edge being present in Erdos-Renyl Graph")
-parser.add_argument("--n_iter", default=1000, type=int, help="Number of iterations for simulation to run")
+# parser.add_argument("--n_iter", default=1000, type=int, help="Number of iterations for simulation to run")
 args = parser.parse_args()
 
 if __name__ == "__main__":
     randomGraph = RandomGraph(n_nodes=args.nodes, p=args.p)
-    randomGraph.gen_RandomPartitions()
+    randomGraph.genRandomPartitions()
     randomGraph.calculateSpectrum()
     randomGraph.showPartitions(args.savefigures)
-    randomGraph.SwapNodes(getSwapNodes(randomGraph))
+    randomGraph.swapNodes(getSwapNodes(randomGraph))
 
     fig, [[axis1, axis2], [axis3, axis4]] = plt.subplots(2, 2, figsize=(16, 16))
     history = np.array(randomGraph.history, dtype=np.float)

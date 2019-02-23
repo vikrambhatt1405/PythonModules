@@ -21,17 +21,19 @@ class RandomGraph(object):
         self.G = nx.erdos_renyi_graph(n=n_nodes, p=p, seed=seed)
         for edge in self.G.edges():
             self.G[edge[0]][edge[1]]['weight'] = np.random.random_sample()
-        logging.info("Random graph created with {} nodes".format(self.G.number_of_edges()))
+        logging.info("Random graph created with {} edges".format(self.G.number_of_edges()))
         logging.info('Weights added to the graph succesfully')
         self.history = []
+        self.partition = None
         self.amends = 0
+        self.spectrum = None
         logging.info("History object created succesfully")
 
     def __repr__(self):
         return "Number of nodes:{0}\nNumber of edges:{1}\nPartions:{2}\nEigen Values of Laplacian Matrix:\n{3}\n".format(
             self.G.number_of_nodes(), self.G.number_of_edges(), self.partition, self.spectrum)
 
-    def gen_RandomPartitions(self):
+    def genRandomPartitions(self):
         self.partition = {}
         self.components = {}
         nodes = np.arange(self.G.number_of_nodes())
@@ -60,7 +62,7 @@ class RandomGraph(object):
         self.history.append([self.algebraic_connectivity, self.components_ac[0], self.components_ac[1]])
         logging.info("Appened to history succesfully.")
 
-    def SwapNodes(self, swapNodes):
+    def swapNodes(self, swapNodes):
         for (nodeX, nodeY) in swapNodes:
             self.amends += 1
             self.partition[0].remove(nodeX)
@@ -116,3 +118,43 @@ class RandomGraph(object):
         if savefig:
             plt.savefig("Erdos-Renyi_" + str(self.amends) + ".pdf")
         plt.show()
+
+    def getExternalNeighbors(self, nodeId):
+        """Returns external neighbors of the current graph as list of node ids"""
+
+        if nodeId in self.G.partition[0]:
+            external_partitionID = 1
+        else:
+            external_partitionID = 0
+        neighbors = set(self.G[nodeId].keys())
+        externalNeighbors = set(self.partition[external_partitionID])
+        externalNeighbors = list(externalNeighbors.intersection(neighbors))
+        return externalNeighbors
+
+
+    def getInternalNeighbors(self, nodeId):
+        """Returns internal neighbors of the current graph as list of node ids"""
+        if nodeId in self.partition[0]:
+            internal_partitionID = 0
+        else:
+            internal_partitionID = 1
+        neighbors = set(self.G[nodeId].keys())
+        internalNeighbors = set(self.partition[internal_partitionID])
+        internalNeighbors = list(internalNeighbors.intersection(neighbors))
+        return internalNeighbors
+
+
+    def externalCost(self, nodeId):
+        externalNeighbors = getExternalNeighbors(self, nodeId)
+        cost = 0
+        for neighbor in externalNeighbors:
+            cost += self.G[nodeId][neighbor]['weight']
+        return cost
+
+
+    def internalCost(self, nodeId):
+        internalNeighbors = getInternalNeighbors(self, nodeId)
+        cost = 0
+        for neighbor in internalNeighbors:
+            cost += self.G[nodeId][neighbor]['weight']
+        return cost
