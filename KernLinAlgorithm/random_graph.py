@@ -65,29 +65,30 @@ class RandomGraph(object):
         self.history.append([self.algebraic_connectivity, self.components_ac[0], self.components_ac[1]])
         logging.info("Appened to history succesfully.")
 
-    def swapNodes(self, swapNodes):
-        for (nodeX, nodeY) in swapNodes:
-            self.amends += 1
-            self.partition[0].remove(nodeX)
-            self.partition[0].append(nodeY)
-            self.partition[1].remove(nodeY)
-            self.partition[1].append(nodeX)
-            # print(self.partition)
-            # time.sleep(20)
-            # self.G=nx.relabel_nodes(self.G,
-            # mapping={nodeX:nodeY,nodeY:nodeX})
-            # self.components[0] = self.G.subgraph(self.partition[0]).copy()
-            # self.components[1] = self.G.subgraph(self.partition[1]).copy()
-            # self.spectrum = nx.laplacian_spectrum(self.G)
-            # self.components_spectrum[0] = nx.laplacian_spectrum(self.components[0])
-            # self.components_spectrum[1] = nx.laplacian_spectrum(self.components[1])
-            self.algebraic_connectivity = nx.algebraic_connectivity(self.G)
-            self.components_ac[0] = nx.algebraic_connectivity(self.components[0])
-            self.components_ac[1] = nx.algebraic_connectivity(self.components[1])
-            # self.history.append([self.algebraic_connectivity, self.components_ac[0], self.components_ac[1]])
-            logging.info("Changes appended to history succesfully.")
+    def swapNodes(self, nodeX, nodeY):
+        self.amends += 1
+        self.partition[0].remove(nodeX)
+        self.partition[0].append(nodeY)
+        self.partition[1].remove(nodeY)
+        self.partition[1].append(nodeX)
+        # print(self.partition)
+        # time.sleep(20)
+        # self.G=nx.relabel_nodes(self.G,
+        # mapping={nodeX:nodeY,nodeY:nodeX})
+        # self.components[0] = self.G.subgraph(self.partition[0]).copy()
+        # self.components[1] = self.G.subgraph(self.partition[1]).copy()
+        # self.spectrum = nx.laplacian_spectrum(self.G)
+        # self.components_spectrum[0] = nx.laplacian_spectrum(self.components[0])
+        # self.components_spectrum[1] = nx.laplacian_spectrum(self.components[1])
+        self.algebraic_connectivity = nx.algebraic_connectivity(self.G)
+        self.components_ac[0] = nx.algebraic_connectivity(self.components[0])
+        self.components_ac[1] = nx.algebraic_connectivity(self.components[1])
+        self.history.append([self.algebraic_connectivity, self.components_ac[0], self.components_ac[1]])
+        logging.info("Changes appended to history succesfully.")
 
     def showPartitions(self, savefig=False):
+        self.components[0] = self.G.subgraph(self.partition[0]).copy()
+        self.components[1] = self.G.subgraph(self.partition[1]).copy()
         colormap = ['green'] * self.G.number_of_nodes()
         for node in self.partition[0]:
             colormap[node] = 'blue'

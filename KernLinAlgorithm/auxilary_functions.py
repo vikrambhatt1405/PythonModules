@@ -1,6 +1,7 @@
 import networkx as nx
 import numpy as np
 import random
+import networkx as nx
 from random_graph import *
 import sys
 import logging
@@ -43,26 +44,25 @@ def showPartitions(randomGraph, savefig=False):
     plt.show()
 
 
-def getMaxGainNodes(randomGraph):
+def getMaxGainNodes(randomGraph, selectedNodesSet):
     """
-    Return two nodes which maximize the gain as defined in Kerningham Lin Algorithm.
-    D is list of external-internal cost for all nodes calculated for the previous partitions before swapping.
-    xPartition is set of current nodes in first components
-    yPartition is set of current nodes in second componets
-    xSelected is list of selected indices in xPartition for the swapping
-    ySelected is list of selected indices in yPartition for the swapping
+    selectedNodes is set of nodes already selected and will not be considered in swapping.
+    Returns maximum gain for the current partition and corresponding swap nodes as defined below.
+    Kernighan, B. W., & Lin, S. (1970). An Efficient Heuristic Procedure for Partitioning Graphs.
+    Bell System Technical Journal, 49(2), 291–307. https://doi.org/10.1002/j.1538-7305.1970.tb01770.x
     """
     maxGain = -sys.maxsize
-    # D represents external cost-internal cost for all nodes. Following the notation from
-    # Kernighan, B. W., & Lin, S. (1970). An Efficient Heuristic Procedure for Partitioning Graphs.
-    # Bell System Technical Journal, 49(2), 291–307. https://doi.org/10.1002/j.1538-7305.1970.tb01770.x
     selectedNodes = queue.Queue(randomGraph.G.number_of_nodes())
     D = randomGraph.totalCost()
+    C = nx.adjacency_matrix(randomGraph.G)
+    print(selectedNodesSet)
+    import time
+    time.sleep(2)
     maxGain = -sys.maxsize
-    for i in randomGraph.partition[0]:
-        for j in randomGraph.partitions[1]:
-            gain = D[i]+D[j]-2*randomGraph.G[i][j]['weight']
+    for i in set(randomGraph.partition[0]).difference(selectedNodesSet):
+        for j in set(randomGraph.partition[1]).difference(selectedNodesSet):
+            gain = D[i]+D[j]-2*C[i,j]
             if(maxGain < gain):
                 maxGain = gain
                 targetNodes = (i,j)
-    return targetNodes
+    return maxGain,targetNodes

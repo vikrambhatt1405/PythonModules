@@ -6,7 +6,7 @@ import logging
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from random_graph import RandomGraph
 from auxilary_functions import *
-
+import queue
 sns.set_style("darkgrid")
 """
 Don't worry about these line if you don't understand what they are doing.Just some helper functions for better
@@ -17,7 +17,7 @@ parser = ArgumentParser("CapsE", formatter_class=ArgumentDefaultsHelpFormatter, 
 logging.basicConfig(filename='errors.log', filemode='a',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.WARNING)
 parser.add_argument("--savefigures", action='store_true', help='Specfiy if you want to save figures')
-parser.add_argument("--nodes", default=50, type=int, help="Number of nodes in Erdos-Renyi Graph")
+parser.add_argument("--nodes", default=10, type=int, help="Number of nodes in Erdos-Renyi Graph")
 parser.add_argument("--p", default=0.25, type=float, help="Probability of edge being present in Erdos-Renyl Graph")
 # parser.add_argument("--n_iter", default=1000, type=int, help="Number of iterations for simulation to run")
 args = parser.parse_args()
@@ -27,7 +27,19 @@ if __name__ == "__main__":
     randomGraph.genRandomPartitions()
     randomGraph.calculateSpectrum()
     randomGraph.showPartitions(args.savefigures)
-    randomGraph.swapNodes(getSwapNodes(randomGraph))
+    # selectedNodes = queue.LifoQueue(randomGraph.G.number_of_nodes()//2)
+    selectedNodesSet = set()
+    totalGain = 0
+    while(len(selectedNodesSet) < randomGraph.G.number_of_nodes()):
+        gain,(nodeX,nodeY) = getMaxGainNodes(randomGraph,selectedNodesSet)
+        randomGraph.swapNodes(nodeX, nodeY)
+        totalGain += gain
+        selectedNodesSet.add(nodeX)
+        selectedNodesSet.add(nodeY)
+        # selectedNodes.put(nodes)
+        print(gain,(nodeX,nodeY))
+    print("Total Gain:",totalGain)
+    # randomGraph.swapNodes(getSwapNodes(randomGraph))
 
     fig, [[axis1, axis2], [axis3, axis4]] = plt.subplots(2, 2, figsize=(16, 16))
     history = np.array(randomGraph.history, dtype=np.float)
@@ -40,7 +52,7 @@ if __name__ == "__main__":
     axis1.set_ylabel("Algebraic Connectivity")
     axis1.legend()
 
-    change_ac = (history[1:, 1:] - history[0, 1:]) / history[0, 1:]
+    change_ac = (history[1:, 1:-1] - history[0, 1:-1]) / history[0, 1:]
     axis2.plot(change_ac[:, 0], ":r*", label='Component 0')
     axis2.plot(change_ac[:, 1], ":g^", label='Component 1')
     axis2.set_title("Fraction of change in Fiedler values after each swap")
