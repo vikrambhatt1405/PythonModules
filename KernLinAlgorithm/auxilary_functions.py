@@ -5,7 +5,7 @@ from random_graph import *
 import sys
 import logging
 import operator
-errors.log
+import queue
 logging.basicConfig(filename='errors.log', filemode='a', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.WARNING)
 
@@ -42,7 +42,8 @@ def showPartitions(randomGraph, savefig=False):
         plt.savefig("Erdos-Renyi_" + str(randomGraph.amends) + ".pdf")
     plt.show()
 
-def maxGainNodes(randomGraph, D, xPartition, yPartition, xNode, yNode):
+
+def getMaxGainNodes(randomGraph):
     """
     Return two nodes which maximize the gain as defined in Kerningham Lin Algorithm.
     D is list of external-internal cost for all nodes calculated for the previous partitions before swapping.
@@ -55,18 +56,13 @@ def maxGainNodes(randomGraph, D, xPartition, yPartition, xNode, yNode):
     # D represents external cost-internal cost for all nodes. Following the notation from
     # Kernighan, B. W., & Lin, S. (1970). An Efficient Heuristic Procedure for Partitioning Graphs.
     # Bell System Technical Journal, 49(2), 291–307. https://doi.org/10.1002/j.1538-7305.1970.tb01770.x
-    for i in randomGraph.G.nodes():
-        D.append(randomGraph.externalCost(i)-randomGraph.internalCost(i))
-        targetNodes = None
-    for xNode in xPartition:
-        for yNode in yPartition:
-            gain = D[x]+D[y]-2*randomGraph.G[xNode][yNode]['weight']
+    selectedNodes = queue.Queue(randomGraph.G.number_of_nodes())
+    D = randomGraph.totalCost()
+    maxGain = -sys.maxsize
+    for i in randomGraph.partition[0]:
+        for j in randomGraph.partitions[1]:
+            gain = D[i]+D[j]-2*randomGraph.G[i][j]['weight']
             if(maxGain < gain):
-                targetNodes = (xNode,yNode)
-
-def getSwapNodes(randomGraph):
-    visitedNodes = set()
-    swapNodes = []  # swap nodes in list of tuples of nodes maintained in the same order as they are found.
-    for i in randomGraph.G.nodes():
-        totalCosts = []
-        totalCosts.append(randomGraph.externalCost(i)-randomGraph.internalCost(i))
+                maxGain = gain
+                targetNodes = (i,j)
+    return targetNodes
