@@ -65,7 +65,7 @@ class RandomGraph(object):
         self.history.append([self.algebraic_connectivity, self.components_ac[0], self.components_ac[1]])
         logging.info("Appened to history succesfully.")
 
-    def swapNodes(self, nodeX, nodeY):
+    def swapNodes(self, nodeX, nodeY, appendToHistory=False):
         self.amends += 1
         self.partition[0].remove(nodeX)
         self.partition[0].append(nodeY)
@@ -80,11 +80,12 @@ class RandomGraph(object):
         # self.spectrum = nx.laplacian_spectrum(self.G)
         # self.components_spectrum[0] = nx.laplacian_spectrum(self.components[0])
         # self.components_spectrum[1] = nx.laplacian_spectrum(self.components[1])
-        self.algebraic_connectivity = nx.algebraic_connectivity(self.G)
-        self.components_ac[0] = nx.algebraic_connectivity(self.components[0])
-        self.components_ac[1] = nx.algebraic_connectivity(self.components[1])
-        self.history.append([self.algebraic_connectivity, self.components_ac[0], self.components_ac[1]])
-        logging.info("Changes appended to history succesfully.")
+        if appendToHistory:
+            self.algebraic_connectivity = nx.algebraic_connectivity(self.G)
+            self.components_ac[0] = nx.algebraic_connectivity(self.components[0])
+            self.components_ac[1] = nx.algebraic_connectivity(self.components[1])
+            self.history.append([self.algebraic_connectivity, self.components_ac[0], self.components_ac[1]])
+            logging.info("Changes appended to history succesfully.")
 
     def showPartitions(self, savefig=False):
         self.components[0] = self.G.subgraph(self.partition[0]).copy()

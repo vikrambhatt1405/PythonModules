@@ -25,21 +25,36 @@ args = parser.parse_args()
 if __name__ == "__main__":
     randomGraph = RandomGraph(n_nodes=args.nodes, p=args.p)
     randomGraph.genRandomPartitions()
-    randomGraph.calculateSpectrum()
-    randomGraph.showPartitions(args.savefigures)
-    # selectedNodes = queue.LifoQueue(randomGraph.G.number_of_nodes()//2)
+    # randomGraph.calculateSpectrum()
+    # randomGraph.showPartitions(args.savefigures)
+    initialPartitionX = randomGraph.partition[0]
+    initialPartitionY = randomGraph.partition[1]
+    selectedNodes = queue.Queue(randomGraph.G.number_of_nodes()//2)
     selectedNodesSet = set()
+    gainList = []
     totalGain = 0
     while(len(selectedNodesSet) < randomGraph.G.number_of_nodes()):
         gain,(nodeX,nodeY) = getMaxGainNodes(randomGraph,selectedNodesSet)
         randomGraph.swapNodes(nodeX, nodeY)
         totalGain += gain
+        gainList.append(gain)
         selectedNodesSet.add(nodeX)
         selectedNodesSet.add(nodeY)
-        # selectedNodes.put(nodes)
-        print(gain,(nodeX,nodeY))
-    print("Total Gain:",totalGain)
-    # randomGraph.swapNodes(getSwapNodes(randomGraph))
+        selectedNodes.put((nodeX,nodeY))
+        # print(gain,(nodeX,nodeY))
+    assert np.isclose(totalGain,0), "Total Gain is not zero"
+    # print("Total Gain:",totalGain)
+    randomGraph.partition[0] = initialPartitionX
+    randomGraph.partition[1] = initialPartitionY
+    # del totalGain, selectedNodesSet, initialPartitionX, initialPartitionY
+    gainList = np.array(gainList)
+    gainSums = np.array([np.sum(gainList[0:i]) for i in range(len(gainList))])
+    k=np.argmax(gainSums)
+    counter = 0
+    while(counter<k):
+        counter += 1
+        nodeX,nodeY = selectedNodes.get()
+        randomGraph.swapNodes(nodeX, nodeY, True)
 
     fig, [[axis1, axis2], [axis3, axis4]] = plt.subplots(2, 2, figsize=(16, 16))
     history = np.array(randomGraph.history, dtype=np.float)
