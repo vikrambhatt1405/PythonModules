@@ -63,13 +63,13 @@ def getMaxGainNodes(randomGraph, selectedNodesSet):
                 targetNodes = (i,j)
     return maxGain,targetNodes
 
-def showPlots(randomGraph,k,partialGainSums):
+def showPlots(randomGraph,k,partialGainSums, savefigures=False):
     fig, (axis1, axis2) =  plt.subplots(1,2,figsize=[5,5])
     history = np.array(randomGraph.history, dtype=np.float)
     axis1.plot(history[:, 0], ":r*", label='Component 0')
     axis1.plot(history[:, 1], ":g^", label='Component 1')
     axis1.axvline(k, color='b', label= 'Optimal Swaps')
-    axis1.set_title("Variations of albegriac connectivity during swapping")
+    axis1.set_title("Variations of albegraic connectivity")
     axis1.set_xlabel("Number of swaps")
     axis1.set_ylabel("Algebraic Connectivity")
     axis1.legend()
@@ -81,5 +81,5 @@ def showPlots(randomGraph,k,partialGainSums):
     axis2.legend()
 
     plt.show()
-    if args.savefigures:
+    if savefigures:
         fig.savefig("results.pdf")

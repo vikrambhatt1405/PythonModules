@@ -41,4 +41,4 @@ if __name__ == "__main__":
     del totalGain
     partialGainSums = [np.sum(gainList[:index]) for index,_ in enumerate(gainList)]
     k=np.argmax(partialGainSums)
-    showPlots(randomGraph,k,partialGainSums)
+    showPlots(randomGraph,k,partialGainSums,args.savefigures)
