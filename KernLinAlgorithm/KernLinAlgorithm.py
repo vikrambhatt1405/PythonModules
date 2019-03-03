@@ -25,6 +25,8 @@ if __name__ == "__main__":
     randomGraph = RandomGraph(n_nodes=args.nodes, p=args.p)
     randomGraph.genRandomPartitions()
     randomGraph.calculateSpectrum()
+    if args.savefigures:
+        showPartitions(randomGraph,args.savefigures)
     selectedNodes = queue.Queue(randomGraph.G.number_of_nodes()//2)
     selectedNodesSet = set()
     gainList = np.array([],dtype=np.float32)
