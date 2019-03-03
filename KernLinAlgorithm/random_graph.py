@@ -73,15 +73,6 @@ class RandomGraph(object):
         self.partition[0].append(nodeY)
         self.partition[1].remove(nodeY)
         self.partition[1].append(nodeX)
-        # print(self.partition)
-        # time.sleep(20)
-        # self.G=nx.relabel_nodes(self.G,
-        # mapping={nodeX:nodeY,nodeY:nodeX})
-        # self.components[0] = self.G.subgraph(self.partition[0]).copy()
-        # self.components[1] = self.G.subgraph(self.partition[1]).copy()
-        # self.spectrum = nx.laplacian_spectrum(self.G)
-        # self.components_spectrum[0] = nx.laplacian_spectrum(self.components[0])
-        # self.components_spectrum[1] = nx.laplacian_spectrum(self.components[1])
         if appendToHistory:
             self.algebraic_connectivity = nx.algebraic_connectivity(self.G)
             self.components[0] = self.G.subgraph(self.partition[0]).copy()

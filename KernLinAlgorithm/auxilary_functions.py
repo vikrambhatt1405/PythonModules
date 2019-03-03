@@ -52,12 +52,8 @@ def getMaxGainNodes(randomGraph, selectedNodesSet):
     Bell System Technical Journal, 49(2), 291–307. https://doi.org/10.1002/j.1538-7305.1970.tb01770.x
     """
     maxGain = -sys.maxsize
-    # selectedNodes = queue.Queue(randomGraph.G.number_of_nodes())
     D = randomGraph.totalCost()
     C = nx.adjacency_matrix(randomGraph.G)
-    # print(selectedNodesSet)
-    # import time
-    # time.sleep(2)
     maxGain = -sys.maxsize
     for i in set(randomGraph.partition[0]).difference(selectedNodesSet):
         for j in set(randomGraph.partition[1]).difference(selectedNodesSet):
