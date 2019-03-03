@@ -30,11 +30,13 @@ class RandomGraph(object):
         self.partition = None
         self.amends = 0
         self.spectrum = None
+        self.components={}
+        self.components_ac = np.zeros(dtype=np.float, shape=[2])
         logging.info("History object created succesfully")
 
     def __repr__(self):
-        return "Number of nodes:{0}\nNumber of edges:{1}\nPartions:{2}\nEigen Values of Laplacian Matrix:\n{3}\n".format(
-            self.G.number_of_nodes(), self.G.number_of_edges(), self.partition, self.spectrum)
+        return "Number of nodes:{0}\nNumber of edges:{1}\nPartions:{2}\n".format(
+            self.G.number_of_nodes(), self.G.number_of_edges(), self.partition)
 
     def genRandomPartitions(self):
         self.partition = {}
@@ -62,7 +64,7 @@ class RandomGraph(object):
         self.components_ac[0] = nx.algebraic_connectivity(self.components[0])
         self.components_ac[1] = nx.algebraic_connectivity(self.components[1])
         logging.info("Spectrum and algebraic connectivity values calculated.")
-        self.history.append([self.algebraic_connectivity, self.components_ac[0], self.components_ac[1]])
+        self.history.append([self.components_ac[0], self.components_ac[1]])
         logging.info("Appened to history succesfully.")
 
     def swapNodes(self, nodeX, nodeY, appendToHistory=False):
@@ -82,9 +84,11 @@ class RandomGraph(object):
         # self.components_spectrum[1] = nx.laplacian_spectrum(self.components[1])
         if appendToHistory:
             self.algebraic_connectivity = nx.algebraic_connectivity(self.G)
+            self.components[0] = self.G.subgraph(self.partition[0]).copy()
+            self.components[1] = self.G.subgraph(self.partition[1]).copy()
             self.components_ac[0] = nx.algebraic_connectivity(self.components[0])
             self.components_ac[1] = nx.algebraic_connectivity(self.components[1])
-            self.history.append([self.algebraic_connectivity, self.components_ac[0], self.components_ac[1]])
+            self.history.append([self.components_ac[0], self.components_ac[1]])
             logging.info("Changes appended to history succesfully.")
 
     def showPartitions(self, savefig=False):

@@ -22,77 +22,67 @@ parser.add_argument("--p", default=0.25, type=float, help="Probability of edge b
 # parser.add_argument("--n_iter", default=1000, type=int, help="Number of iterations for simulation to run")
 args = parser.parse_args()
 
+def showPlots(randomGraph):
+    # fig, [[axis1, axis2], [axis3, axis4]] = plt.subplots(2, 2, figsize=(16, 16))
+    fig, axis1 =  plt.subplots(1,1,figsize=[5,5])
+    history = np.array(randomGraph.history, dtype=np.float)
+    axis1.plot(history[:, 0], ":r*", label='Component 0')
+    # axis1.axhline(y=history[0][1], color='r', label='Initial value(Component 0)', linestyle="-")
+    axis1.plot(history[:, 1], ":g^", label='Component 1')
+    # axis1.axhline(y=history[0][2], color='g', label='Initial value(Component 1)', linestyle="-")
+    axis1.set_title("Variations of albegriac connectivity during swapping")
+    axis1.set_xlabel("Number of swaps")
+    axis1.set_ylabel("Algebraic Connectivity")
+    axis1.legend()
+
+    # change_ac = (history[1:, 1:-1] - history[0, 1:-1]) / history[0, 1:]
+    # axis2.plot(change_ac[:, 0], ":r*", label='Component 0')
+    # axis2.plot(change_ac[:, 1], ":g^", label='Component 1')
+    # axis2.set_title("Fraction of change in Fiedler values after each swap")
+    # axis2.set_xlabel("Swaps")
+    # axis2.set_ylabel("Algebraic Connectivity")
+    # axis2.legend()
+    #
+    # axis3.plot(change_ac[:, 0] + change_ac[:, 1], "--g.", label='Total Change')
+    # xmax = np.argmax(change_ac[:, 0] + change_ac[:, 1])
+    # ymax = np.max(change_ac[:, 0] + change_ac[:, 1])
+    # axis3.plot(xmax, ymax, "bH", markersize=10, label='Max Value')
+    # axis3.axvline(xmax, color='b')
+    # axis3.set_title("Total fractional  change in Fiedler values for both components")
+    # axis3.set_xlabel("Swaps")
+    # axis3.set_ylabel("Algebraic Connectivity")
+    # x_ticks = np.append(axis3.get_xticks(), xmax)
+    # axis3.set_xticks(x_ticks)
+    # axis3.legend()
+    #
+    # axis4.boxplot(change_ac)
+    # axis4.set_xticklabels(["Component0", "Component1"])
+    # axis4.set_ylabel("Fraction of change w.r.t initial value")
+    # axis4.set_title("Variations of Feidler values for each components")
+    # axis4.legend()
+
+    plt.show()
+    if args.savefigures:
+        fig.savefig("results.pdf")
+
+
 if __name__ == "__main__":
     randomGraph = RandomGraph(n_nodes=args.nodes, p=args.p)
     randomGraph.genRandomPartitions()
-    # randomGraph.calculateSpectrum()
-    # randomGraph.showPartitions(args.savefigures)
-    initialPartitionX = randomGraph.partition[0]
-    initialPartitionY = randomGraph.partition[1]
+    randomGraph.calculateSpectrum()
     selectedNodes = queue.Queue(randomGraph.G.number_of_nodes()//2)
     selectedNodesSet = set()
     gainList = []
     totalGain = 0
     while(len(selectedNodesSet) < randomGraph.G.number_of_nodes()):
         gain,(nodeX,nodeY) = getMaxGainNodes(randomGraph,selectedNodesSet)
-        randomGraph.swapNodes(nodeX, nodeY)
+        randomGraph.swapNodes(nodeX, nodeY,True)
         totalGain += gain
         gainList.append(gain)
         selectedNodesSet.add(nodeX)
         selectedNodesSet.add(nodeY)
         selectedNodes.put((nodeX,nodeY))
-        # print(gain,(nodeX,nodeY))
     assert np.isclose(totalGain,0), "Total Gain is not zero"
-    # print("Total Gain:",totalGain)
-    randomGraph.partition[0] = initialPartitionX
-    randomGraph.partition[1] = initialPartitionY
-    # del totalGain, selectedNodesSet, initialPartitionX, initialPartitionY
-    gainList = np.array(gainList)
-    gainSums = np.array([np.sum(gainList[0:i]) for i in range(len(gainList))])
-    k=np.argmax(gainSums)
-    counter = 0
-    while(counter<k):
-        counter += 1
-        nodeX,nodeY = selectedNodes.get()
-        randomGraph.swapNodes(nodeX, nodeY, True)
-
-    fig, [[axis1, axis2], [axis3, axis4]] = plt.subplots(2, 2, figsize=(16, 16))
-    history = np.array(randomGraph.history, dtype=np.float)
-    axis1.plot(history[1:, 1], ":r*", label='Component 0')
-    axis1.axhline(y=history[0][1], color='r', label='Initial value(Component 0)', linestyle="-")
-    axis1.plot(history[1:, 2], ":g^", label='Component 1')
-    axis1.axhline(y=history[0][2], color='g', label='Initial value(Component 1)', linestyle="-")
-    axis1.set_title("Variations of eigenvalues during swapping")
-    axis1.set_xlabel("Number of swaps")
-    axis1.set_ylabel("Algebraic Connectivity")
-    axis1.legend()
-
-    change_ac = (history[1:, 1:-1] - history[0, 1:-1]) / history[0, 1:]
-    axis2.plot(change_ac[:, 0], ":r*", label='Component 0')
-    axis2.plot(change_ac[:, 1], ":g^", label='Component 1')
-    axis2.set_title("Fraction of change in Fiedler values after each swap")
-    axis2.set_xlabel("Swaps")
-    axis2.set_ylabel("Algebraic Connectivity")
-    axis2.legend()
-
-    axis3.plot(change_ac[:, 0] + change_ac[:, 1], "--g.", label='Total Change')
-    xmax = np.argmax(change_ac[:, 0] + change_ac[:, 1])
-    ymax = np.max(change_ac[:, 0] + change_ac[:, 1])
-    axis3.plot(xmax, ymax, "bH", markersize=10, label='Max Value')
-    axis3.axvline(xmax, color='b')
-    axis3.set_title("Total fractional  change in Fiedler values for both components")
-    axis3.set_xlabel("Swaps")
-    axis3.set_ylabel("Algebraic Connectivity")
-    x_ticks = np.append(axis3.get_xticks(), xmax)
-    axis3.set_xticks(x_ticks)
-    axis3.legend()
-
-    axis4.boxplot(change_ac)
-    axis4.set_xticklabels(["Component0", "Component1"])
-    axis4.set_ylabel("Fraction of change w.r.t initial value")
-    axis4.set_title("Variations of Feidler values for each components")
-    axis4.legend()
-
-    plt.show()
-    if args.savefigures:
-        fig.savefig("results.pdf")
+    del totalGain
+    
+    showPlots(randomGraph)
