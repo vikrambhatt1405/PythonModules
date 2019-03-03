@@ -17,24 +17,29 @@ parser = ArgumentParser("CapsE", formatter_class=ArgumentDefaultsHelpFormatter, 
 logging.basicConfig(filename='errors.log', filemode='a',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.WARNING)
 parser.add_argument("--savefigures", action='store_true', help='Specfiy if you want to save figures')
-parser.add_argument("--nodes", default=10, type=int, help="Number of nodes in Erdos-Renyi Graph")
+parser.add_argument("--nodes", default=50, type=int, help="Number of nodes in Erdos-Renyi Graph")
 parser.add_argument("--p", default=0.25, type=float, help="Probability of edge being present in Erdos-Renyl Graph")
-# parser.add_argument("--n_iter", default=1000, type=int, help="Number of iterations for simulation to run")
 args = parser.parse_args()
 
-def showPlots(randomGraph):
+def showPlots(randomGraph,k,partialGainSums):
     # fig, [[axis1, axis2], [axis3, axis4]] = plt.subplots(2, 2, figsize=(16, 16))
-    fig, axis1 =  plt.subplots(1,1,figsize=[5,5])
+    fig, (axis1, axis2) =  plt.subplots(1,2,figsize=[5,5])
     history = np.array(randomGraph.history, dtype=np.float)
     axis1.plot(history[:, 0], ":r*", label='Component 0')
     # axis1.axhline(y=history[0][1], color='r', label='Initial value(Component 0)', linestyle="-")
     axis1.plot(history[:, 1], ":g^", label='Component 1')
+    axis1.axvline(k, color='b', label= 'Optimal Swaps')
     # axis1.axhline(y=history[0][2], color='g', label='Initial value(Component 1)', linestyle="-")
     axis1.set_title("Variations of albegriac connectivity during swapping")
     axis1.set_xlabel("Number of swaps")
     axis1.set_ylabel("Algebraic Connectivity")
     axis1.legend()
 
+    axis2.plot(partialGainSums,":g*")
+    axis2.axvline(k,color='b',label='Max gain at swap {}'.format(k),linestyle=":")
+    axis2.set_xlabel("Number of swaps")
+    axis2.set_ylabel("Gain")
+    axis2.legend()
     # change_ac = (history[1:, 1:-1] - history[0, 1:-1]) / history[0, 1:]
     # axis2.plot(change_ac[:, 0], ":r*", label='Component 0')
     # axis2.plot(change_ac[:, 1], ":g^", label='Component 1')
@@ -72,17 +77,18 @@ if __name__ == "__main__":
     randomGraph.calculateSpectrum()
     selectedNodes = queue.Queue(randomGraph.G.number_of_nodes()//2)
     selectedNodesSet = set()
-    gainList = []
+    gainList = np.array([],dtype=np.float32)
     totalGain = 0
     while(len(selectedNodesSet) < randomGraph.G.number_of_nodes()):
         gain,(nodeX,nodeY) = getMaxGainNodes(randomGraph,selectedNodesSet)
         randomGraph.swapNodes(nodeX, nodeY,True)
         totalGain += gain
-        gainList.append(gain)
+        gainList=np.append(gainList,gain)
         selectedNodesSet.add(nodeX)
         selectedNodesSet.add(nodeY)
         selectedNodes.put((nodeX,nodeY))
     assert np.isclose(totalGain,0), "Total Gain is not zero"
     del totalGain
-    
-    showPlots(randomGraph)
+    partialGainSums = [np.sum(gainList[:index]) for index,_ in enumerate(gainList)]
+    k=np.argmax(partialGainSums)
+    showPlots(randomGraph,k,partialGainSums)
