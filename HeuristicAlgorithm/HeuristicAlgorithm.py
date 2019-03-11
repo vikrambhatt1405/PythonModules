@@ -9,7 +9,7 @@ from random_graph import RandomGraph
 from auxilary_functions import *
 
 """
-Don't worry about these line if you don't understand what they are doing.Just some helper functions for better
+Don't worry about these lines if you don't understand what they are doing.Just some helper functions for better
 debugging experience.
 """
 
